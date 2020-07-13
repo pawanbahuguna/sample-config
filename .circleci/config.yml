@@ -1,22 +1,29 @@
 version: 2.1
-orbs:
-  aws-cli: circleci/aws-cli@1.2.1
-  aws-ecr: circleci/aws-ecr@6.9.1
 jobs:
-  deploy:
+  build:
+    working_directory: ~/appName
     docker:
-      - image: cimg/python:3.8
+      - image: ruby:2.3.1-jessie
+        environment:
+          PG_HOST: localhost
+          PG_USER: ubuntu
+          RAILS_ENV: test
+          RACK_ENV: test
+      # The following example uses the official postgres 9.6 image, you may also use circleci/postgres:9.6 
+      # which includes a few enhancements and modifications. It is possible to use either image.
+      - image: postgres:9.6-jessie
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: db_name
     steps:
       - checkout
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          aws-region: AWS_REGION
-      - aws-ecr/ecr-login:
-          region: AWS_REGION
-          account-url: AWS_ECR_ACCOUNT_URL
-workflows:
-  version: 2.1
-  deploy:
-    jobs:
-      - deploy
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle install
+      - run: 
+          name: Set up DB
+          command: |
+            bundle exec rake db:create db:schema:load --trace
+            bundle exec rake db:migrate
+        environment:
+          DATABASE_URL: "postgres://ubuntu@localhost:5432/db_name"
