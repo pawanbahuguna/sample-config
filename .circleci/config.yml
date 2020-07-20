@@ -8,8 +8,8 @@ workflows:
 jobs:
   test:
     machine:
-      #image: ubuntu-1604:202004-01
-      image: circleci/classic:latest
+      image: ubuntu-1604:202004-01
+      #image: circleci/classic:latest
       #image: circleci/classic:201808-01
     steps:
       - checkout
@@ -19,4 +19,5 @@ jobs:
              echo "Hi from Machine Executor"
              uname -a
              echo "******* wget *******"
+             wget -v
              wget --timeout=10 https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz --debug
