@@ -5,6 +5,7 @@ workflows:
     jobs:
      - test
 
+jobs:
   test:
     machine:
       image: ubuntu-1604:202004-01
@@ -17,4 +18,5 @@ workflows:
           command: | 
              echo "Hi from Machine Executor"
              uname -a
+             echo "******* wget "*******"
              wget --timeout=10 https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz --debug
