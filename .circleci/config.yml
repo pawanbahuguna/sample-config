@@ -19,5 +19,5 @@ jobs:
              echo "Hi from Machine Executor"
              uname -a
              echo "******* wget *******"
-             wget -v
              wget --timeout=10 https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz --debug
+             wget --version
