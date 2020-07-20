@@ -1,23 +1,20 @@
-version: 2
-jobs:
-  build:
-    working_directory: ~/appName
-    docker:
-      # The following example uses the official postgres 9.6 image, you may also use circleci/postgres:9.6 
-      # which includes a few enhancements and modifications. It is possible to use either image.
-      - image: postgres:9.6-jessie
-        environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: db_name
+version: 2.1
+
+workflows:
+  build-and-deploy:
+    jobs:
+     - test
+
+  test:
+    machine:
+      image: ubuntu-1604:202004-01
+      #image: circleci/classic:latest
+      #image: circleci/classic:201808-01
     steps:
       - checkout
       - run:
-          name: Install Ruby Dependencies
-          command: bundle install
-      - run: 
-          name: Set up DB
-          command: |
-            bundle exec rake db:create db:schema:load --trace
-            bundle exec rake db:migrate
-        environment:
-          DATABASE_URL: "postgres://ubuntu@localhost:5432/db_name"
+          name: Machine Executor
+          command: | 
+             echo "Hi from Machine Executor"
+             uname -a
+             wget --timeout=10 https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz --debug
