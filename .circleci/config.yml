@@ -8,8 +8,8 @@ workflows:
 jobs:
   test:
     machine:
-      image: ubuntu-1604:202004-01
-      #image: circleci/classic:latest
+      #image: ubuntu-1604:202004-01
+      image: circleci/classic:latest
       #image: circleci/classic:201808-01
     steps:
       - checkout
