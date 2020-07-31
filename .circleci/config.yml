@@ -1,23 +1,17 @@
 version: 2.1
 
-workflows:
-  build-and-deploy:
-    jobs:
-     - test
-
 jobs:
   test:
-    machine:
-      image: ubuntu-1604:202004-01
-      #image: circleci/classic:latest
-      #image: circleci/classic:201808-01
+    docker:
+      - image: docker:18.05.0-ce-git
     steps:
       - checkout
-      - run:
-          name: Machine Executor
-          command: | 
-             echo "Hi from Machine Executor"
-             uname -a
-             echo $TESTVAR
-             #echo "******* wget *******"
-             #wget --timeout=10 https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz --debug
+      - setup_remote_docker:
+          version: 18.05.0-ce
+      - run: docker build .
+
+workflows:
+  wf:
+    jobs:
+      - test:
+          name: with/slash
