@@ -1,17 +1,21 @@
 version: 2.1
 
+workflows:
+  build-deploy:
+    jobs:
+     - build
+
 jobs:
-  test:
+  build:
     docker:
-      - image: docker:18.05.0-ce-git
+      - image: circleci/golang
+
     steps:
       - checkout
       - setup_remote_docker:
-          version: 18.05.0-ce
-      - run: docker build .
-
-workflows:
-  wf:
-    jobs:
-      - test:
-          name: with/slash
+          version: 19.03.12
+      - run: |
+          scp script.sh remote-docker:/tmp
+          ssh -q remote-docker chmod +x /tmp/script.sh
+          ssh -q -t remote-docker /tmp/script.sh
+          ssh remote-docker docker version | grep Experimental
