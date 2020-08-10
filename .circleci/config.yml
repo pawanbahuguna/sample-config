@@ -5,17 +5,17 @@ workflows:
     jobs:
      - build
 
+executors:
+  default_exec: #declares a reusable executor to be used
+    machine:
+
 jobs:
   build:
-    docker:
-      - image: circleci/golang
-
+    executor: default_exec
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 19.03.12
-      - run: |
-          scp script.sh remote-docker:/tmp
-          ssh -q remote-docker chmod +x /tmp/script.sh
-          ssh -q -t remote-docker /tmp/script.sh
-          ssh remote-docker docker version | grep Experimental
+      - run: | 
+          pwd
+          ls -lh
+          chmod +x sanity_test.sh
+          bash sanity_test.sh
