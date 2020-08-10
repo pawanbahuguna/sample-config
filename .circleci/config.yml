@@ -5,17 +5,16 @@ workflows:
     jobs:
      - build
 
-executors:
-  default_exec: #declares a reusable executor to be used
-    machine:
-
 jobs:
   build:
-    executor: default_exec
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - checkout
-      - run: | 
-          pwd
-          ls -lh
-          chmod +x sanity_test.sh
-          bash sanity_test.sh
+      - run:
+          name: Run Script
+          command: |
+             pwd
+             ls -lh
+             chmod +x sanity_test.sh
+             bash sanity_test.sh
