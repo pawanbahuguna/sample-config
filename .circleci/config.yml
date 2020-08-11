@@ -23,4 +23,4 @@ jobs:
              pwd
              ls -lh
              chmod +x sanity_test.sh
-             set -x sanity_test.sh
+             sh -x sanity_test.sh
