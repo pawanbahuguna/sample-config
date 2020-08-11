@@ -5,10 +5,16 @@ workflows:
     jobs:
      - build
 
+executors:
+  default_exec: #declares a reusable executor to be used
+    machine:
+      docker_layer_caching: false
+      
 jobs:
   build:
-    machine: 
-      image: ubuntu-1604:201903-01
+    executor: default_exec
+    #machine: 
+      #mage: ubuntu-1604:201903-01
     steps:
       - checkout
       - run:
