@@ -1,15 +1,21 @@
 version: 2.1
 
 workflows:
-  build-deploy:
+  version: 2
+  build_test_deploy:
     jobs:
-     - build
+      - build
 
 jobs:
   build:
-    - image: cimg/python:3.8.5
-    #machine: 
-      #mage: ubuntu-1604:201903-01
+
+    docker:
+      - image: cimg/python:3.8.5
     steps:
       - checkout
-      - run: python --version
+      - run:
+          name: Run random commands
+          command: |
+              python --version
+              uname -a
+              uptime
