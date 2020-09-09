@@ -5,22 +5,11 @@ workflows:
     jobs:
      - build
 
-executors:
-  default_exec: #declares a reusable executor to be used
-    machine:
-      docker_layer_caching: false
-      
 jobs:
   build:
-    executor: default_exec
+    - image: cimg/python:3.8.5
     #machine: 
       #mage: ubuntu-1604:201903-01
     steps:
       - checkout
-      - run:
-          name: Run Script
-          command: |
-             pwd
-             ls -lh
-             chmod +x sanity_test.sh
-             bash -x sanity_test.sh
+      - run: python --version
