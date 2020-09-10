@@ -1,21 +1,11 @@
 version: 2.1
-
-workflows:
-  version: 2
-  build_test_deploy:
-    jobs:
-      - build
-
 jobs:
   build:
-
     machine:
-      - image: ubuntu-1604:202007-01
+      image: ubuntu-1604:202007-01
     steps:
       - checkout
       - run:
-          name: Python Version
-          command: |
-              python --version
-              uname -a
-              uptime
+          name: "Python"
+          command: python --version
+
