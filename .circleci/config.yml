@@ -7,5 +7,5 @@ jobs:
       - checkout
       - run:
           name: "Python"
-          command: python --version
+          command: python3 --version
 
