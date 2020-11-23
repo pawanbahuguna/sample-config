@@ -15,13 +15,19 @@ jobs:
     steps:
       - checkout
       - restore_cache: 
-          keys: my-rpm-cache
+          keys: rpm-cache
       - run:
           name: Skipping Download
           command: |
-              #wget https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
+              FILE=oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
+              if [ -f "$FILE" ]; then
+                 echo "$FILE exists, skipping download"
+              else
+                 echo "Downloading RPM"
+                 wget https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
+              fi
       - save_cache:
-          key: my-rpm-cache
+          key: rpm-cache
           paths:
             - oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm 
  
