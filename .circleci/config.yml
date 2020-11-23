@@ -1,11 +1,27 @@
 version: 2.1
+
+workflows:
+  build-and-deploy:
+    jobs:
+
+
 jobs:
+
   build:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-1604:201903-01     
+      
     steps:
       - checkout
+      - restore_cache: 
+          keys: my-rpm-cache
       - run:
-          name: "Python"
-          command: python3 --version
-
+          name: Download RPM
+          command: |
+              wget https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
+              ls -al
+      - save_cache:
+          key: my-rpm-cache
+          paths:
+            - oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm 
+ 
