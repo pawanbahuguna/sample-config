@@ -17,9 +17,9 @@ jobs:
       - restore_cache: 
           keys: my-rpm-cache
       - run:
-          name: Download RPM
+          name: Skipping Download
           command: |
-              wget https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
+              #wget https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
       - save_cache:
           key: my-rpm-cache
           paths:
