@@ -1,33 +1,104 @@
-version: 2.1
-
-workflows:
-  build-and-deploy:
-    jobs:
-      - build
-
+version: 2
 
 jobs:
-
   build:
-    machine:
-      image: ubuntu-1604:201903-01     
-      
+    docker:
+      - image: circleci/golang
+
     steps:
       - checkout
-      - restore_cache: 
-          keys: rpm-cache
-      - run:
-          name: Download RPM
-          command: |
-              FILE=oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
-              if [ -f "$FILE" ]; then
-                 echo "$FILE exists, skipping download"
-              else
-                 echo "Downloading RPM..."
-                 wget https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
-              fi
-      - save_cache:
-          key: rpm-cache
-          paths:
-            - oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm 
- 
+      - run: sleep 5
+
+  chart:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4     
+
+  "branch deploy":
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4 
+  qa1:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4 
+
+  qa2:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4 
+
+  qa3:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4 
+      
+  qa4:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4 
+  qa5:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4 
+  qa6:
+    docker:
+      - image: circleci/golang
+    steps:  
+      - run: sleep 4                         
+
+workflows:
+  version: 2
+  release:
+    jobs:
+    - build
+    - chart
+    - "branch deploy":
+        requires:
+          - chart
+
+    - "qa2 approval":
+        type: approval
+        requires:
+          - chart
+    - "qa3 approval":
+        type: approval
+        requires:
+          - chart
+    - "qa4 approval":
+        type: approval
+        requires:
+          - chart
+    - "qa5 approval":
+        type: approval
+        requires:
+          - chart
+    - "qa6 approval":
+        type: approval
+        requires:
+          - chart
+    - qa1:
+        requires:
+          - chart
+    - qa2:
+        requires:
+          - "qa2 approval"
+    - qa3:
+        requires:
+          - "qa3 approval"
+    - qa4:
+        requires:
+          - "qa4 approval"
+    - qa5:
+        requires:
+          - "qa5 approval"
+    - qa6:
+        requires:
+          - "qa6 approval" 
