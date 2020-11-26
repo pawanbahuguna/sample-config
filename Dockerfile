@@ -1,7 +1,7 @@
 # For case 82318
 
-FROM ubuntu:20.10
-#FROM ubuntu:18.04
+#FROM ubuntu:20.10
+FROM ubuntu:18.04
 ARG VERSION=1.15.0
 RUN useradd pgbouncer -b '/' -m
 
