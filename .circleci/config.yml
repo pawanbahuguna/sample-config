@@ -1,23 +1,24 @@
 version: 2.1
 
 workflows:
-
-  wf-remote:
+  build-deploy:
     jobs:
      - build
 
 jobs:
   build:
-
     docker:
-      - image: circleci/node
-
+      - image: cimg/base:stable
     steps:
-      - checkout
       - setup_remote_docker:
-          version: 19.03.13 
-      - run:
-          name: Build Docker image
-          command: | 
-             docker build -t test_image .
-      - run: docker image ls
+          version: 19.03.14
+      - checkout
+      - run: |
+          ssh remote-docker \<<EOF
+            sudo bash -c 'echo "{\"experimental\": true}" > /etc/docker/daemon.json'
+            sudo systemctl restart docker
+            sudo docker info
+          EOF
+      - run: ssh remote-docker docker version | grep Experimental    
+      - run: |
+          docker buildx build .
