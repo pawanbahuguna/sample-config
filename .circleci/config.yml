@@ -1,23 +1,160 @@
+# Ruby CircleCI 2.1 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-ruby/ for more details
+#
 version: 2.1
+jobs:
+  test:
+    parameters:
+      script:
+        type: string
+    environment:
+      BUNDLE_GEMFILE: Gemfile
+      BUNDLE_WITHOUT: "production:staging:development"
+
+    docker:
+      # specify the version you desire here
+      - image: circleci/ruby:2.7.2-node-browsers
+        environment:
+          RAILS_ENV: test
+          RACK_ENV: test
+          PG_HOST: 127.0.0.1
+          PG_USER: ubuntu
+          RETRY_TESTS: true
+          DATABASE_URL: "postgres://ubuntu@localhost:5432/adair_test"
+          AWS_S3_BUCKET: "adair--test" # this is not really required, the aws sdk is mocked but things fail otherwise
+          REDIS_URL: "redis://localhost:6379"
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      - image: circleci/postgres:alpine
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: adair_test
+      - image: circleci/redis:buster
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Installing Dependencies
+          command: sudo apt-get update &&  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+      - run:
+          name: add postgres repo
+          command: echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" |sudo tee /etc/apt/sources.list.d/pgdg.list
+      - run:
+          name: install postgres12
+          command: sudo apt-get update && sudo apt-get install postgresql-client-12 -y
+      - restore_cache:
+          keys:
+            - gems-v1-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+            - gems-v1-{{ .Branch }}-
+            - gems-v1-
+
+      - run:
+          name: Bundle install
+          command: gem install bundler && (bundle check --path vendor/bundle || bundle install --deployment --jobs=4 --retry=3)
+
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: gems-v1-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+
+      - restore_cache:
+          keys:
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
+
+      - run:
+          name: Yarn install
+          command: yarn install --frozen-lockfile
+
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
+      - run: << parameters.script >>
+
+      - store_artifacts:
+          path: /home/circleci/repo/tmp/screenshots
+      - store_artifacts:
+          path: coverage
+
+  lint:
+    resource_class: medium+
+    environment:
+      BUNDLE_GEMFILE: Gemfile
+      BUNDLE_WITHOUT: "production:staging:development"
+
+    docker:
+      - image: circleci/ruby:2.7.2-node
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Installing Dependencies
+          command: sudo apt-get update && sudo apt-get install postgresql-client && sudo apt-get install -y codespell
+
+      - restore_cache:
+          keys:
+            - gems-v1-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+            - gems-v1-{{ .Branch }}-
+            - gems-v1-
+
+      - run:
+          name: Bundle install
+          command: gem install bundler && (bundle check --path vendor/bundle || bundle install --deployment --jobs=4 --retry=3)
+
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: gems-v1-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+
+      - restore_cache:
+          keys:
+            - v1-rubocop-cache-{{ checksum ".rubocop.yml" }}-{{ .Branch }}
+            - v1-rubocop-cache-{{ checksum ".rubocop.yml" }}-master
+            - v1-rubocop-cache-{{ checksum ".rubocop.yml" }}
+
+      - save_cache:
+          key: v1-rubocop-cache-{{ checksum ".rubocop.yml" }}-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ../.cache/rubocop_cache
+
+      - restore_cache:
+          keys:
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
+
+      - run:
+          name: Yarn install
+          command: yarn install --frozen-lockfile
+
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
+      - run: bin/lintci
 
 workflows:
-  build-deploy:
+  version: 2
+  release:
     jobs:
-     - build
-
-jobs:
-  build:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - setup_remote_docker:
-          version: 19.03.14
-      - checkout
-      - run: |
-          ssh remote-docker \<<EOF
-            sudo bash -c 'echo "{\"experimental\": true}" > /etc/docker/daemon.json'
-            sudo systemctl restart docker
-            sudo docker info
-          EOF
-      - run: |
-          docker buildx build .
+      - test:
+          matrix:
+            parameters:
+              script:
+                - bin/rails test
+                - bin/yarn test
+                - bin/rails test:system
+                - bin/brakeman
+      - lint
