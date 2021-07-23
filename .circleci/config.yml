@@ -14,11 +14,12 @@ jobs:
           name: build image
           command: docker build -t test123 .
       - run:
-          name: check image
+          name: check image and list TEST file
           command: |
              docker image ls
-             docker run --name test_run --rm -it test123 /bin/sh
+             docker run --name test_run -t -d test123
              docker exec test_run ls
+             docker stop test_run
              
 
 workflows:
