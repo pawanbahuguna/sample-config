@@ -12,12 +12,14 @@ jobs:
       - checkout
       - run:
           name: build image
-          command: docker build .
+          command: docker build -t test123 .
       - run:
           name: check image
           command: |
              docker image ls
-             ls -lh /home/node/TEST.txt
+             docker run --name test_run --rm -it test123 /bin/sh
+             docker exec test_run ls
+             
 
 workflows:
   version: 2.1
