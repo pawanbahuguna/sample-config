@@ -41,5 +41,4 @@ workflows:
   version: 2.1
   build-and-deploy:
     jobs:
-      #- build-image
       - build
