@@ -42,7 +42,8 @@ jobs:
       - image: cimg/base:stable
     steps:
       - setup_remote_docker:
-          version: 20.10.11
+          #version: 20.10.11
+          version: 19.03.14
       - run:
           name: Create a new docker buildx builder instance
           command: |
