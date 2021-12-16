@@ -37,8 +37,21 @@ jobs:
       - run: |
           docker buildx build .
 
+  build2:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - setup_remote_docker:
+          version: 20.10.11
+      - run:
+          name: Create a new docker buildx builder instance
+          command: |
+            docker run --privileged --rm tonistiigi/binfmt --install all
+            docker context create multiarch-builder
+            docker buildx create --use multiarch-builder
+
 workflows:
   version: 2.1
   build-and-deploy:
     jobs:
-      - build
+      - build2
