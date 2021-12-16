@@ -20,10 +20,26 @@ jobs:
              docker run --name test_run -t -d test123
              docker exec test_run ls
              docker stop test_run
-             
+
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - setup_remote_docker:
+          version: 19.03.14
+      - checkout
+      - run: |
+          ssh remote-docker \<<EOF
+            sudo bash -c 'echo "{\"experimental\": true}" > /etc/docker/daemon.json'
+            sudo systemctl restart docker
+            sudo docker info
+          EOF
+      - run: |
+          docker buildx build .
 
 workflows:
   version: 2.1
   build-and-deploy:
     jobs:
-      - build-image
+      #- build-image
+      - build
